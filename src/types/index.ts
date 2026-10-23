@@ -42,6 +42,7 @@ export interface User {
   assignedClasses?: string[]; // Specific classes taught by teacher, e.g. ['9A', '9B']
   teacherType?: TeacherType; // 'pembuat_soal' (bisa input soal & paket) vs 'guru_biasa' (hanya unduh nilai kelas)
   assignedSessionIds?: string[]; // For proctors
+  assignedRoom?: string; // Assigned exam room (e.g. 'Lab Komputer 1', 'Lab Komputer 2')
 }
 
 export interface Subject {
@@ -170,6 +171,7 @@ export interface ExamAttempt {
   studentName: string;
   studentNumber: string;
   studentClass: string;
+  roomName?: string; // e.g. 'Lab Komputer 1 (Ruang 1)'
   status: ExamAttemptStatus;
   startedAt?: string;
   finishedAt?: string;

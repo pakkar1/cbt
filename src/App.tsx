@@ -121,9 +121,11 @@ const MainApp: React.FC = () => {
         <main className="flex-1">
           <ExamConfirmPage
             session={activeSession}
-            onConfirmStart={(validToken) => {
-              const pkg = getExamPackages().find(p => p.id === activeSession.examPackageId) || getExamPackages()[0];
-              const attempt = getOrCreateExamAttempt(currentUser, activeSession, pkg);
+            onConfirmStart={(validToken, confirmedSession) => {
+              const targetSession = confirmedSession || activeSession;
+              const pkg = getExamPackages().find(p => p.id === targetSession.examPackageId) || getExamPackages()[0];
+              const attempt = getOrCreateExamAttempt(currentUser, targetSession, pkg);
+              setActiveSession(targetSession);
               setActivePackage(pkg);
               setActiveAttempt(attempt);
               setIsConfirmActive(false);

@@ -50,6 +50,16 @@ export function initializeStorage(): void {
   }
   if (!localStorage.getItem(STORAGE_KEYS.SESSIONS)) {
     localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(generateDefaultSessions()));
+  } else {
+    try {
+      const existingSessions: ExamSession[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSIONS) || '[]');
+      const hasMultiRoom = existingSessions.some(s => s.id.includes('-r2') || s.id.includes('-r3'));
+      if (!hasMultiRoom) {
+        localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(generateDefaultSessions()));
+      }
+    } catch {
+      localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(generateDefaultSessions()));
+    }
   }
   if (!localStorage.getItem(STORAGE_KEYS.STUDENTS)) {
     localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(generateDefaultStudents()));
@@ -57,7 +67,7 @@ export function initializeStorage(): void {
   if (!localStorage.getItem(STORAGE_KEYS.STAFF)) {
     localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(INITIAL_STAFF_USERS));
   } else {
-    // Migration: ensure new teacher users and teacherType fields exist
+    // Migration: ensure new teacher users, proctors and their room settings exist
     try {
       const existingStaff: User[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.STAFF) || '[]');
       let updated = false;
@@ -66,11 +76,18 @@ export function initializeStorage(): void {
         if (!found) {
           existingStaff.push(initUser);
           updated = true;
-        } else if (initUser.role === 'guru' && !found.teacherType) {
-          found.teacherType = initUser.teacherType || 'pembuat_soal';
-          found.assignedSubjectId = found.assignedSubjectId || initUser.assignedSubjectId;
-          found.assignedClasses = found.assignedClasses || initUser.assignedClasses;
-          updated = true;
+        } else {
+          if (initUser.role === 'proktor' && !found.assignedRoom) {
+            found.assignedRoom = initUser.assignedRoom;
+            found.assignedSessionIds = initUser.assignedSessionIds;
+            updated = true;
+          }
+          if (initUser.role === 'guru' && !found.teacherType) {
+            found.teacherType = initUser.teacherType || 'pembuat_soal';
+            found.assignedSubjectId = found.assignedSubjectId || initUser.assignedSubjectId;
+            found.assignedClasses = found.assignedClasses || initUser.assignedClasses;
+            updated = true;
+          }
         }
       });
       if (updated) {
@@ -293,6 +310,14 @@ export function getExamSessionById(sessionId: string): ExamSession | undefined {
   return getExamSessions().find(s => s.id === sessionId);
 }
 
+// Find session matching start token (case-insensitive) across all rooms
+export function findSessionByToken(token: string): ExamSession | undefined {
+  const clean = (token || '').trim().toUpperCase();
+  if (!clean) return undefined;
+  const sessions = getExamSessions();
+  return sessions.find(s => s.startToken && s.startToken.toUpperCase() === clean);
+}
+
 export function saveExamSession(session: ExamSession): void {
   const list = getExamSessions();
   const idx = list.findIndex(s => s.id === session.id);
@@ -397,6 +422,7 @@ export function getOrCreateExamAttempt(
     studentName: student.name,
     studentNumber: student.nomorPeserta || student.username,
     studentClass: student.rombel || student.kelas || '9A',
+    roomName: session.roomName,
     status: 'IN_PROGRESS',
     startedAt: now.toISOString(),
     deadline: deadline,

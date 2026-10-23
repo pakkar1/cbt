@@ -21,6 +21,10 @@ import {
   ArrowRight,
   ShieldCheck,
   Server,
+  Copy,
+  ExternalLink,
+  Globe,
+  Check,
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -39,6 +43,63 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   const activeSessions = sessions.filter(s => s.status === 'OPEN' || s.status === 'IN_PROGRESS');
   const completedAttempts = attempts.filter(a => a.status === 'SUBMITTED' || a.status === 'AUTO_SUBMITTED');
   const inProgressAttempts = attempts.filter(a => a.status === 'IN_PROGRESS');
+
+  const [copiedKey, setCopiedKey] = React.useState<string | null>(null);
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+
+  const portalUrls = [
+    {
+      key: 'siswa',
+      label: 'Portal Peserta Ujian (Siswa)',
+      path: '/',
+      altQuery: '/?portal=siswa',
+      desc: 'Halaman utama ujian untuk seluruh peserta didik',
+      badge: 'Siswa',
+      badgeClass: 'bg-blue-100 text-blue-800',
+    },
+    {
+      key: 'guru',
+      label: 'Portal Guru Pengampu & Pembuat Soal',
+      path: '/guru',
+      altQuery: '/?portal=guru',
+      desc: 'Khusus dewan guru: Bank Soal, Paket Ujian, & Rekap Nilai',
+      badge: 'Guru',
+      badgeClass: 'bg-emerald-100 text-emerald-800',
+    },
+    {
+      key: 'proktor',
+      label: 'Portal Proktor & Pengawas Ruang',
+      path: '/proktor',
+      altQuery: '/?portal=proktor',
+      desc: 'Rilis Token, Monitoring Live 120 PC, & Berita Acara',
+      badge: 'Proktor',
+      badgeClass: 'bg-amber-100 text-amber-800',
+    },
+    {
+      key: 'admin',
+      label: 'Portal Administrator CBT',
+      path: '/admin',
+      altQuery: '/?portal=admin',
+      desc: 'Panel kontrol sekolah, jadwal 78 sesi, data siswa & guru',
+      badge: 'Admin',
+      badgeClass: 'bg-indigo-100 text-indigo-800',
+    },
+    {
+      key: 'superadmin',
+      label: 'Super Admin Gateway',
+      path: '/superadmin',
+      altQuery: '/?portal=superadmin',
+      desc: 'Security gateway otorisasi master & reset sistem',
+      badge: 'Super Admin',
+      badgeClass: 'bg-purple-100 text-purple-800',
+    },
+  ];
+
+  const handleCopyUrl = (key: string, url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2500);
+  };
 
   return (
     <div className="space-y-8">
@@ -263,6 +324,86 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
               </button>
+            </div>
+          </div>
+
+          {/* Tautan Akses Portal CBT (Vercel / Production Links) */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-3 text-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 font-bold text-slate-900">
+                <Globe className="w-4 h-4 text-blue-600" />
+                <span>Tautan Akses Portal CBT (Vercel & Sekolah)</span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">Multi-URL Routing</span>
+            </div>
+            
+            <p className="text-slate-500 text-[11px] leading-relaxed">
+              Bagikan tautan berikut sesuai perannya. Karena role switcher dihilangkan untuk keamanan, setiap pengguna mengakses portal melalui tautan khusus di bawah ini:
+            </p>
+
+            <div className="space-y-2 pt-1">
+              {portalUrls.map(p => {
+                const fullUrl = `${baseUrl}${p.path}`;
+                const isCopied = copiedKey === p.key;
+
+                return (
+                  <div
+                    key={p.key}
+                    className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-slate-300 transition-colors"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${p.badgeClass}`}>
+                          {p.badge}
+                        </span>
+                        <span className="font-bold text-slate-800">{p.label}</span>
+                      </div>
+                      <div className="font-mono text-[11px] text-blue-700 font-semibold truncate max-w-xs sm:max-w-md">
+                        {fullUrl}
+                      </div>
+                      <span className="text-[10px] text-slate-400 block">{p.desc}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                      <button
+                        onClick={() => handleCopyUrl(p.key, fullUrl)}
+                        className={`px-2.5 py-1.5 rounded-lg font-bold text-[11px] flex items-center gap-1 transition-all cursor-pointer ${
+                          isCopied
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 shadow-2xs'
+                        }`}
+                        title="Salin tautan ke clipboard"
+                      >
+                        {isCopied ? (
+                          <>
+                            <Check className="w-3 h-3" />
+                            <span>Tersalin!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            <span>Salin</span>
+                          </>
+                        )}
+                      </button>
+
+                      <a
+                        href={p.path}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-1.5 bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 rounded-lg transition-colors"
+                        title="Buka di tab baru"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-[11px] text-blue-900 leading-relaxed">
+              💡 <strong>Tips Vercel / Hosting:</strong> File <code>vercel.json</code> sudah otomatis dikonfigurasikan dengan rewrite SPA. Sehingga tautan <code>/admin</code>, <code>/guru</code>, <code>/proktor</code> bisa dibuka langsung tanpa error 404. Anda juga bisa menggunakan alternatif query URL (misal: <code>?portal=admin</code> atau <code>#admin</code>).
             </div>
           </div>
 

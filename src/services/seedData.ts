@@ -434,10 +434,16 @@ export const INITIAL_EXAM_PACKAGES: ExamPackage[] = [
   }
 ];
 
-// Helper to generate 78 exam sessions (13 days x 6 sessions)
+export const CBT_ROOMS = [
+  { id: 'r1', name: 'Lab Komputer 1', code: 'Ruang 1', proctorId: 'usr-proktor-1', proctorName: 'Rahmat Hidayat, S.Kom', defaultTokenPrefix: '10' },
+  { id: 'r2', name: 'Lab Komputer 2', code: 'Ruang 2', proctorId: 'usr-proktor-2', proctorName: 'Ahmad Fauzi, S.Kom', defaultTokenPrefix: '20' },
+  { id: 'r3', name: 'Lab Komputer 3', code: 'Ruang 3', proctorId: 'usr-proktor-3', proctorName: 'Nurul Hidayah, S.Pd.', defaultTokenPrefix: '30' },
+  { id: 'r4', name: 'Lab Multimedia', code: 'Ruang 4', proctorId: 'usr-proktor-4', proctorName: 'Dian Pratama, M.Kom', defaultTokenPrefix: '40' },
+];
+
+// Helper to generate exam sessions supporting multi-room (Lab 1, 2, 3, 4)
 export function generateDefaultSessions(): ExamSession[] {
   const sessions: ExamSession[] = [];
-  const rooms = ['Lab Komputer 1', 'Lab Komputer 2', 'Lab Komputer 3', 'Lab Multimedia'];
   const timeslots = [
     { start: '07:30', end: '09:00' },
     { start: '09:15', end: '10:45' },
@@ -447,7 +453,6 @@ export function generateDefaultSessions(): ExamSession[] {
     { start: '16:30', end: '18:00' },
   ];
 
-  // Base starting date: today / upcoming schedule
   const startDate = new Date();
   
   for (let day = 1; day <= 13; day++) {
@@ -456,44 +461,43 @@ export function generateDefaultSessions(): ExamSession[] {
     const dateStr = curDate.toISOString().split('T')[0];
 
     for (let sNum = 1; sNum <= 6; sNum++) {
-      const sessionId = `sesi-h${day}-s${sNum}`;
       const time = timeslots[sNum - 1];
-      const room = rooms[(day + sNum) % rooms.length];
-      
-      // Determine subject cycle across the 14 subjects
       const subjectIdx = ((day - 1) * 6 + (sNum - 1)) % INITIAL_SUBJECTS.length;
       const subject = INITIAL_SUBJECTS[subjectIdx];
-      
-      // Select appropriate package
       const packageId = sNum % 2 === 1 ? 'pkg-simulasi-lengkap' : 'pkg-anbk-numerasi-01';
 
-      // Status: first session of day 1 is OPEN for demo testing, others scheduled
-      let status: 'DRAFT' | 'OPEN' | 'IN_PROGRESS' | 'COMPLETED' | 'SUSPENDED' = 'DRAFT';
-      if (day === 1 && sNum === 1) status = 'OPEN';
-      else if (day === 1 && sNum === 2) status = 'IN_PROGRESS';
+      // Generate a session for each room so multi-room operates concurrently
+      CBT_ROOMS.forEach((room, rIdx) => {
+        // Sesi 1 Ruang 1 keeps canonical ID 'sesi-h1-s1', other rooms have '-rX'
+        const sessionId = (rIdx === 0) ? `sesi-h${day}-s${sNum}` : `sesi-h${day}-s${sNum}-${room.id}`;
+        
+        let status: 'DRAFT' | 'OPEN' | 'IN_PROGRESS' | 'COMPLETED' | 'SUSPENDED' = 'DRAFT';
+        if (day === 1 && sNum === 1) status = 'OPEN';
+        else if (day === 1 && sNum === 2) status = 'IN_PROGRESS';
 
-      // Random 6-letter uppercase token
-      const randomToken = 'SMP' + (100 + ((day * 7 + sNum * 13) % 900));
+        // Distinct, predictable start tokens per room (e.g. Day 1 Sesi 1: SMP101 for Ruang 1, SMP102 for Ruang 2, etc.)
+        const randomToken = `SMP${sNum}${rIdx + 1}${day % 10}`;
 
-      sessions.push({
-        id: sessionId,
-        dayNumber: day,
-        sessionNumber: sNum,
-        date: dateStr,
-        startTime: time.start,
-        endTime: time.end,
-        durationMinutes: 60,
-        subjectId: subject.id,
-        examPackageId: packageId,
-        classes: ['9A', '9B', '9C'],
-        roomName: room,
-        maxCapacity: 120,
-        proctorId: 'usr-proktor-1',
-        proctorName: 'Rahmat Hidayat, S.Kom',
-        status,
-        startToken: randomToken,
-        isSubmitTokenRequired: true,
-        minSubmitMinutes: 45,
+        sessions.push({
+          id: sessionId,
+          dayNumber: day,
+          sessionNumber: sNum,
+          date: dateStr,
+          startTime: time.start,
+          endTime: time.end,
+          durationMinutes: 60,
+          subjectId: subject.id,
+          examPackageId: packageId,
+          classes: ['9A', '9B', '9C'],
+          roomName: room.name,
+          maxCapacity: 30, // 30 PCs per room (standard CBT lab capacity)
+          proctorId: room.proctorId,
+          proctorName: room.proctorName,
+          status,
+          startToken: randomToken,
+          isSubmitTokenRequired: true,
+          minSubmitMinutes: 45,
+        });
       });
     }
   }
@@ -598,10 +602,51 @@ export const INITIAL_STAFF_USERS: User[] = [
   {
     id: 'usr-proktor-1',
     username: 'proktor',
-    name: 'Rahmat Hidayat, S.Kom (Proktor Lab 1)',
+    name: 'Rahmat Hidayat, S.Kom (Proktor Ruang 1)',
     role: 'proktor',
     email: 'rahmat.proktor@smp-cerdas.sch.id',
     sekolah: 'SMP Negeri 1 Cerdas Mandiri',
     assignedSessionIds: ['sesi-h1-s1', 'sesi-h1-s2'],
+    assignedRoom: 'Lab Komputer 1',
+  },
+  {
+    id: 'usr-proktor-1b',
+    username: 'proktor1',
+    name: 'Rahmat Hidayat, S.Kom (Proktor Ruang 1)',
+    role: 'proktor',
+    email: 'rahmat.proktor@smp-cerdas.sch.id',
+    sekolah: 'SMP Negeri 1 Cerdas Mandiri',
+    assignedSessionIds: ['sesi-h1-s1', 'sesi-h1-s2'],
+    assignedRoom: 'Lab Komputer 1',
+  },
+  {
+    id: 'usr-proktor-2',
+    username: 'proktor2',
+    name: 'Ahmad Fauzi, S.Kom (Proktor Ruang 2)',
+    role: 'proktor',
+    email: 'ahmad.proktor@smp-cerdas.sch.id',
+    sekolah: 'SMP Negeri 1 Cerdas Mandiri',
+    assignedSessionIds: ['sesi-h1-s1-r2', 'sesi-h1-s2-r2'],
+    assignedRoom: 'Lab Komputer 2',
+  },
+  {
+    id: 'usr-proktor-3',
+    username: 'proktor3',
+    name: 'Nurul Hidayah, S.Pd. (Proktor Ruang 3)',
+    role: 'proktor',
+    email: 'nurul.proktor@smp-cerdas.sch.id',
+    sekolah: 'SMP Negeri 1 Cerdas Mandiri',
+    assignedSessionIds: ['sesi-h1-s1-r3', 'sesi-h1-s2-r3'],
+    assignedRoom: 'Lab Komputer 3',
+  },
+  {
+    id: 'usr-proktor-4',
+    username: 'proktor4',
+    name: 'Dian Pratama, M.Kom (Proktor Ruang 4)',
+    role: 'proktor',
+    email: 'dian.proktor@smp-cerdas.sch.id',
+    sekolah: 'SMP Negeri 1 Cerdas Mandiri',
+    assignedSessionIds: ['sesi-h1-s1-r4', 'sesi-h1-s2-r4'],
+    assignedRoom: 'Lab Multimedia',
   },
 ];

@@ -1,0 +1,6 @@
+{
+  "name": "Neotest CBT Assessment Platform",
+  "description": "Neotest: Platform ujian berbasis komputer terstandar SMP dengan alur dan pengalaman pengerjaan mirip ANBK/TKA, multi-role (Siswa, Guru, Proktor, Admin), 14 mata pelajaran, dan manajemen sesi lengkap.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

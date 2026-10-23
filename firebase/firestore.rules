@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+    
+    function isSuperAdmin() {
+      return isAuthenticated() && (getUserRole() == 'super_admin');
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (getUserRole() == 'admin' || getUserRole() == 'super_admin');
+    }
+    
+    function isTeacher() {
+      return isAuthenticated() && (getUserRole() == 'guru' || isAdmin());
+    }
+    
+    function isProctor() {
+      return isAuthenticated() && (getUserRole() == 'proktor' || isAdmin());
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // School Settings & Configurations (Public read for active candidates, write by admin)
+    match /appSettings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Subjects (14 mapel)
+    match /subjects/{subjectId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Questions Bank: Students MUST NEVER read raw question bank (prevents answer key leaks)
+    match /questionBanks/{questionId} {
+      allow read, write: if isTeacher();
+    }
+
+    // Exam Packages: Public metadata read by students, full content managed by teachers/admins
+    match /examPackages/{packageId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher();
+    }
+
+    // Exam Sessions: Read by candidates in that session, managed by proctors and admins
+    match /examSessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow write: if isProctor();
+    }
+
+    // Students Data
+    match /students/{studentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Exam Attempts & Answers: Highly protected.
+    // Candidate can only read/update their own active attempt while session is open.
+    // Once status is SUBMITTED, write is locked!
+    match /examAttempts/{attemptId} {
+      allow read: if isOwner(resource.data.studentId) || isProctor() || isTeacher();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.studentId);
+      allow update: if (isOwner(resource.data.studentId) && resource.data.status == 'IN_PROGRESS') || isProctor() || isTeacher();
+      allow delete: if isAdmin();
+    }
+
+    // Answers sub-documents
+    match /examAttempts/{attemptId}/answers/{questionId} {
+      allow read: if isOwner(get(/databases/$(database)/documents/examAttempts/$(attemptId)).data.studentId) || isProctor() || isTeacher();
+      allow write: if isOwner(get(/databases/$(database)/documents/examAttempts/$(attemptId)).data.studentId) && 
+                      get(/databases/$(database)/documents/examAttempts/$(attemptId)).data.status == 'IN_PROGRESS';
+    }
+
+    // Proctor Incidents & Berita Acara
+    match /incidentReports/{reportId} {
+      allow read: if isProctor() || isAdmin();
+      allow write: if isProctor();
+    }
+
+    // Audit Logs: Append-only for all authorized actions, read only by Super Admin
+    match /auditLogs/{logId} {
+      allow read: if isSuperAdmin() || isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+  }
+}

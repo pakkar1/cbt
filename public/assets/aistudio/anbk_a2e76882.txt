@@ -1,0 +1,1010 @@
+# MASTER PROMPT — PLATFORM UJIAN SMP BERBASIS WEB
+
+## 1. PERAN DAN TUJUAN
+
+Bertindaklah sebagai Senior Full-Stack Engineer, Software Architect, Database Engineer, UI/UX Designer, Cybersecurity Engineer, dan Performance Engineer yang berpengalaman membangun platform asesmen pendidikan berskala besar.
+
+Bangun aplikasi ujian sekolah berbasis web yang memiliki alur, pola navigasi, tata letak ruang ujian digital, mekanisme pengerjaan, pengelolaan waktu, penandaan soal, navigasi nomor soal, dan proses penyelesaian yang menyerupai pengalaman Asesmen Nasional Berbasis Komputer (ANBK) dan Tes Kemampuan Akademik (TKA) tingkat SMP.
+
+Aplikasi harus mempunyai identitas, nama, logo, dan desain orisinal sendiri. Jangan menggunakan logo pemerintah, mengeklaim sebagai aplikasi resmi pemerintah, atau menyalin aset berhak cipta yang tidak disediakan secara sah.
+
+Nama aplikasi sementara: **SMP Digital Assessment Platform**. Buat nama aplikasi, logo, warna utama, dan identitas sekolah dapat diubah melalui panel administrator.
+
+Tujuan utama:
+1. Menyelenggarakan ujian online untuk siswa kelas 7, 8, dan 9 SMP.
+2. Menampung total sekitar 1.000 siswa.
+3. Menyelenggarakan ujian dalam 6 sesi per hari selama 13 hari.
+4. Mendukung kapasitas konfigurasi maksimal 120 peserta per sesi.
+5. Mendukung banyak mata pelajaran, bank soal, jadwal ujian, proktor, token ujian, dan analisis hasil.
+6. Memprioritaskan keamanan, keakuratan data, kestabilan, kemudahan penggunaan, serta biaya operasional serendah mungkin.
+7. Menghasilkan aplikasi nyata yang berfungsi, bukan hanya desain, demo, atau mockup.
+
+Jangan hanya menampilkan data contoh. Seluruh fungsi produksi harus terhubung ke backend dan database. Data demo hanya boleh digunakan pada lingkungan pengembangan dan harus dipisahkan dari data produksi.
+
+## 2. TEKNOLOGI WAJIB
+
+Gunakan stack berikut:
+
+- Frontend: React + TypeScript.
+- Build tool: Vite atau konfigurasi React yang kompatibel dengan Vercel.
+- Styling: Tailwind CSS atau sistem CSS modular yang konsisten.
+- Komponen UI: reusable, responsif, aksesibel, dan ringan.
+- Routing: React Router atau router kompatibel.
+- Backend: Vercel Serverless Functions menggunakan TypeScript.
+- Database: Firebase Cloud Firestore.
+- Authentication: Firebase Authentication.
+- Backend database access: Firebase Admin SDK, hanya di server.
+- Validasi data: Zod atau library validasi setara.
+- Pengujian: Vitest dan React Testing Library; gunakan pengujian API sesuai kebutuhan.
+- Version control: Git dan GitHub.
+- Hosting: Vercel untuk frontend dan endpoint API.
+- Database dan autentikasi: Firebase.
+
+Gunakan package stabil yang saling kompatibel. Jangan menggunakan library yang tidak diperlukan.
+
+Jangan menggunakan PHP, MySQL, PDO, atau backend yang tidak sesuai dengan arsitektur di atas.
+
+Jangan pernah menaruh Firebase Admin SDK credentials, private key, token rahasia, atau kunci jawaban ujian di frontend.
+
+Gunakan environment variables:
+- VITE_FIREBASE_API_KEY
+- VITE_FIREBASE_AUTH_DOMAIN
+- VITE_FIREBASE_PROJECT_ID
+- VITE_FIREBASE_APP_ID
+- FIREBASE_PROJECT_ID
+- FIREBASE_CLIENT_EMAIL
+- FIREBASE_PRIVATE_KEY
+
+Sesuaikan konfigurasi dengan kebutuhan nyata. Semua variabel VITE_ hanya untuk konfigurasi frontend yang memang aman dipublikasikan. Variabel server harus disimpan dalam Vercel Environment Variables dan tidak boleh dikirim kepada browser.
+
+Jika memungkinkan, gunakan kredensial service account melalui mekanisme aman yang didukung deployment. Jangan pernah memasukkan kredensial ke GitHub atau file frontend.
+
+Sediakan `.env.example` tanpa nilai rahasia yang sebenarnya.
+
+## 3. TARGET PESERTA DAN JADWAL
+
+Konfigurasi awal:
+
+- Total siswa: 1.000.
+- Jenjang: SMP.
+- Kelas: 7, 8, dan 9.
+- Hari pelaksanaan: 13 hari.
+- Sesi per hari: 6 sesi.
+- Maksimal peserta per sesi: 120.
+- Total slot sesi: 78.
+- Kapasitas teoritis seluruh slot: 9.360 peserta-slot.
+- Zona waktu: Asia/Jakarta.
+- Bahasa antarmuka: Bahasa Indonesia.
+
+Jumlah siswa pada setiap sesi tidak harus 120. Sistem harus mendukung jumlah peserta berbeda sesuai pembagian kelas, sekolah, jadwal, dan mata pelajaran.
+
+Buat pengelolaan jadwal fleksibel sehingga administrator dapat mengatur:
+- Tanggal ujian.
+- Hari pelaksanaan.
+- Nomor sesi.
+- Jam mulai.
+- Durasi ujian.
+- Jam berakhir.
+- Mata pelajaran.
+- Kelas.
+- Daftar peserta.
+- Proktor.
+- Status sesi.
+- Token mulai ujian.
+- Token penyelesaian atau submit, jika diaktifkan.
+
+Cegah siswa mengikuti sesi yang bukan miliknya. Cegah dua sesi aktif yang bertentangan untuk peserta yang sama, kecuali administrator secara eksplisit mengizinkannya.
+
+Gunakan waktu server sebagai acuan resmi. Jam komputer siswa hanya untuk menampilkan perkiraan waktu.
+
+## 4. DAFTAR MATA PELAJARAN
+
+Buat 14 mata pelajaran berikut:
+
+1. Pendidikan Agama Islam.
+2. Pendidikan Agama Kristen.
+3. Pendidikan Agama Katolik.
+4. Pendidikan Agama Hindu.
+5. Bahasa Indonesia.
+6. Matematika.
+7. Pendidikan Pancasila/PKn.
+8. Bahasa Inggris.
+9. Ilmu Pengetahuan Alam (IPA).
+10. Ilmu Pengetahuan Sosial (IPS).
+11. Pendidikan Jasmani, Olahraga, dan Kesehatan (PJOK).
+12. Seni Budaya/Prakarya (SBK/Prakarya).
+13. Informatika.
+14. AI dan Coding.
+
+Setiap mata pelajaran dapat ditetapkan untuk kelas 7, 8, 9, atau kombinasi kelas tertentu.
+
+Jangan menganggap seluruh siswa wajib mengikuti semua mata pelajaran. Administrator harus menentukan mata pelajaran yang berlaku bagi masing-masing kelas dan peserta.
+
+Setiap mata pelajaran mempunyai:
+- Kode.
+- Nama.
+- Deskripsi.
+- Kelas yang dilayani.
+- Status aktif.
+- Kurikulum atau tahun ajaran.
+- Pengaturan durasi ujian.
+- Pengaturan komposisi soal.
+- Pengaturan metode penilaian.
+
+Jangan mengunci daftar mata pelajaran di kode frontend. Semua harus dikelola melalui database dan panel administrator.
+
+## 5. ROLE DAN HAK AKSES
+
+Implementasikan role-based access control (RBAC).
+
+### A. Super Administrator
+- Mengelola konfigurasi global.
+- Mengelola administrator.
+- Mengatur hak akses.
+- Mengelola sekolah dan tahun ajaran.
+- Melihat seluruh data dan laporan.
+- Mengelola konfigurasi keamanan.
+- Melihat audit log.
+- Mengatur konfigurasi aplikasi.
+
+### B. Administrator
+- Mengelola siswa dan data kelas.
+- Mengimpor data peserta melalui CSV.
+- Mengelola mata pelajaran.
+- Mengelola bank soal.
+- Membuat paket ujian.
+- Menetapkan jadwal.
+- Membagi peserta ke sesi.
+- Menetapkan proktor.
+- Membuka dan menutup pendaftaran peserta.
+- Melihat hasil dan analisis ujian sesuai hak akses.
+- Mengekspor laporan.
+
+### C. Guru
+- Melihat mata pelajaran yang menjadi kewenangannya.
+- Membuat, mengedit, dan mengelola bank soal sesuai izin.
+- Menyusun paket soal.
+- Mengatur bobot soal sesuai kewenangan.
+- Melihat hasil dan analisis mata pelajaran yang diampu.
+- Tidak boleh mengubah nilai final tanpa proses koreksi yang tercatat.
+
+### D. Proktor/Pengawas
+- Melihat jadwal sesi yang ditugaskan.
+- Melihat daftar peserta sesi.
+- Membuka sesi sesuai jadwal dan izin.
+- Membuat atau menerbitkan token mulai ujian.
+- Melihat status peserta secara realtime atau berkala.
+- Melihat peserta belum login, sedang ujian, terputus, selesai, atau memerlukan bantuan.
+- Mengizinkan tindakan pemulihan yang diperbolehkan.
+- Menerbitkan token submit setelah persyaratan waktu terpenuhi, jika fitur tersebut diaktifkan.
+- Mengakhiri sesi sesuai hak akses.
+- Tidak boleh mengakses kunci jawaban dan mengubah hasil ujian.
+
+### E. Siswa
+- Melihat ujian yang ditugaskan.
+- Melihat jadwal.
+- Memasuki ujian dengan autentikasi yang valid.
+- Memasukkan token ujian.
+- Mengerjakan soal.
+- Menyimpan jawaban.
+- Menandai soal untuk ditinjau kembali.
+- Menavigasi soal.
+- Menyelesaikan dan mengirimkan ujian.
+- Melihat hasil hanya jika administrator mengizinkannya.
+
+Semua pemeriksaan hak akses wajib dilakukan di backend. Menyembunyikan tombol di frontend bukan mekanisme keamanan.
+
+## 6. AUTENTIKASI DAN IDENTITAS SISWA
+
+Gunakan Firebase Authentication untuk autentikasi pengguna.
+
+Sediakan mekanisme login yang sesuai untuk setiap role. Untuk siswa, prioritaskan login sederhana menggunakan akun atau identitas peserta yang telah dibuat administrator, tanpa mengharuskan setiap siswa mempunyai akun Google pribadi.
+
+Jika menggunakan username atau nomor peserta, implementasikan verifikasi kredensial secara aman melalui backend. Jangan menyimpan password dalam bentuk teks biasa di Firestore.
+
+Sediakan:
+- Login.
+- Logout.
+- Validasi sesi.
+- Pemulihan akses yang aman.
+- Penggantian kredensial sesuai kewenangan.
+- Penonaktifan akun.
+- Validasi role.
+- Pembatasan akses berdasarkan peserta, kelas, mata pelajaran, dan sesi.
+
+Identitas siswa mencakup:
+- ID internal.
+- Nomor induk siswa.
+- NISN jika tersedia.
+- Nama lengkap.
+- Kelas.
+- Rombongan belajar.
+- Sekolah.
+- Status akun.
+- Role.
+- Referensi sesi yang ditugaskan.
+
+Gunakan ID internal sebagai referensi relasional. Jangan menganggap NISN sebagai password atau rahasia autentikasi.
+
+## 7. DESAIN ANTARMUKA UJIAN
+
+Buat tampilan yang terinspirasi oleh pola ujian komputer terstandar, tetapi memiliki identitas visual sendiri.
+
+### Halaman login
+- Logo dan nama aplikasi.
+- Form login.
+- Petunjuk akses.
+- Pesan kesalahan yang jelas.
+- Tampilan sederhana dan ringan.
+
+### Dashboard siswa
+Tampilkan:
+- Nama peserta.
+- Nomor peserta.
+- Kelas.
+- Daftar ujian yang ditugaskan.
+- Mata pelajaran.
+- Tanggal dan sesi.
+- Waktu mulai dan durasi.
+- Status ujian.
+- Tombol masuk ujian apabila jadwal dan persyaratan terpenuhi.
+
+### Halaman konfirmasi sebelum ujian
+Tampilkan:
+- Identitas peserta.
+- Nama mata pelajaran.
+- Jumlah soal.
+- Durasi ujian.
+- Instruksi pengerjaan.
+- Informasi token.
+- Peringatan bahwa jawaban akan disimpan.
+- Tombol mulai setelah semua persyaratan dipenuhi.
+
+### Halaman pengerjaan soal
+Rancang tata letak desktop dengan:
+- Header berisi logo, nama ujian, identitas peserta, dan status koneksi.
+- Timer hitung mundur.
+- Nomor soal.
+- Area soal.
+- Area pilihan jawaban atau input jawaban.
+- Navigasi nomor soal.
+- Tombol sebelumnya dan berikutnya.
+- Tombol tandai untuk ditinjau.
+- Indikator soal belum dijawab.
+- Indikator soal sudah dijawab.
+- Indikator soal yang ditandai.
+- Tombol daftar soal.
+- Tombol selesai ujian.
+
+Tampilkan indikator penyimpanan dengan status:
+- Menyimpan.
+- Tersimpan.
+- Gagal menyimpan.
+- Menunggu koneksi.
+
+Gunakan warna dengan arti yang konsisten. Jangan hanya mengandalkan warna; tambahkan teks atau ikon untuk aksesibilitas.
+
+Tata letak harus responsif, tetapi prioritaskan pengalaman pengerjaan melalui komputer atau Chromebook. Pastikan navigasi tetap dapat digunakan pada layar lebih kecil.
+
+Sediakan konfirmasi sebelum keluar dari ujian atau mengirimkan jawaban final.
+
+## 8. MESIN UJIAN
+
+Bangun exam engine yang terpisah dari komponen UI.
+
+Setiap pelaksanaan ujian mempunyai:
+- ID ujian.
+- ID paket soal.
+- ID peserta.
+- ID sesi.
+- Waktu mulai resmi.
+- Batas akhir resmi.
+- Durasi.
+- Status pengerjaan.
+- Jawaban peserta.
+- Riwayat penyimpanan.
+- Status finalisasi.
+- Nilai setelah penilaian.
+
+Status ujian yang disarankan:
+- DRAFT.
+- SCHEDULED.
+- WAITING_TOKEN.
+- READY.
+- IN_PROGRESS.
+- SUBMITTED.
+- AUTO_SUBMITTED.
+- EXPIRED.
+- CANCELLED.
+
+Transisi status harus divalidasi di backend. Jangan izinkan perubahan status secara bebas dari browser.
+
+### Alur ujian
+1. Peserta login.
+2. Backend memverifikasi identitas dan penugasan.
+3. Sistem memeriksa jadwal dan status sesi.
+4. Peserta memasukkan token jika diwajibkan.
+5. Backend memvalidasi token.
+6. Sistem membuat atau melanjutkan attempt peserta.
+7. Waktu mulai dan deadline resmi dicatat.
+8. Peserta mengerjakan soal.
+9. Jawaban disimpan secara berkala dan setiap terjadi perubahan penting.
+10. Peserta dapat meninjau soal yang belum dijawab.
+11. Peserta mengirimkan ujian.
+12. Backend memvalidasi dan mengunci attempt.
+13. Backend menghitung nilai sesuai aturan penilaian.
+14. Hasil disimpan dan dapat dianalisis oleh pihak yang berwenang.
+
+Gunakan satu attempt aktif untuk satu peserta pada satu penugasan ujian, kecuali administrator mengaktifkan mekanisme retake.
+
+Cegah dua tab atau perangkat membuat attempt baru yang bertentangan. Implementasikan kebijakan sesi aktif dan pemulihan yang aman.
+
+## 9. JENIS SOAL
+
+Dukung jenis soal berikut:
+
+1. Pilihan ganda satu jawaban.
+2. Pilihan ganda kompleks dengan lebih dari satu jawaban benar.
+3. Benar/salah.
+4. Menjodohkan.
+5. Isian singkat.
+6. Uraian.
+7. Soal berbasis stimulus atau bacaan.
+8. Soal dengan gambar.
+9. Soal dengan tabel.
+10. Soal dengan rumus matematika.
+11. Soal dengan diagram atau ilustrasi.
+
+Setiap soal memiliki:
+- ID unik.
+- Kode soal.
+- Mata pelajaran.
+- Kelas.
+- Materi.
+- Kompetensi atau indikator.
+- Tingkat kesulitan.
+- Stimulus jika diperlukan.
+- Isi soal.
+- Gambar atau media pendukung.
+- Jenis soal.
+- Pilihan jawaban.
+- Bobot.
+- Status aktif.
+- Versi soal.
+
+Gunakan rich text editor yang aman untuk pembuatan soal. Dukung pemformatan dasar, tabel, gambar, daftar, simbol matematika, dan rumus melalui KaTeX atau MathJax.
+
+Sanitasi seluruh konten HTML untuk mencegah XSS. Batasi ukuran unggahan dan gunakan validasi tipe file.
+
+Untuk soal pilihan ganda, kunci jawaban disimpan secara privat dan tidak pernah dikirim ke frontend selama ujian berlangsung.
+
+Untuk soal uraian, sediakan penilaian manual oleh guru yang berwenang. Jangan menganggap jawaban uraian dapat dinilai secara akurat dengan pencocokan teks sederhana.
+
+## 10. BANK SOAL DAN PAKET UJIAN
+
+Sediakan halaman bank soal dengan:
+- Pencarian.
+- Filter mata pelajaran.
+- Filter kelas.
+- Filter materi.
+- Filter tingkat kesulitan.
+- Filter jenis soal.
+- Pagination.
+- Tambah soal.
+- Edit soal.
+- Duplikasi soal.
+- Arsipkan soal.
+- Pratinjau soal.
+
+Sediakan impor dan ekspor soal menggunakan format CSV atau JSON yang terdokumentasi. Jika menggunakan Excel, validasi isi file sebelum menyimpan.
+
+Paket ujian harus mendukung:
+- Pemilihan soal secara manual.
+- Pemilihan soal berdasarkan kriteria.
+- Jumlah soal.
+- Bobot tiap soal.
+- Durasi.
+- Urutan soal.
+- Pengacakan soal.
+- Pengacakan pilihan jawaban.
+- Aturan penilaian.
+- Kelas yang berhak mengikuti.
+- Mata pelajaran.
+- Versi paket.
+
+Setelah paket ujian dipublikasikan, perubahan pada bank soal tidak boleh secara diam-diam mengubah soal yang sedang dikerjakan. Buat snapshot atau versi paket yang immutable untuk setiap pelaksanaan ujian.
+
+Jika soal diacak, urutan soal dan pilihan harus konsisten untuk attempt peserta yang sama ketika halaman dimuat ulang.
+
+Jangan mengirim kunci jawaban, bobot sensitif, atau metadata privat melalui endpoint publik.
+
+## 11. TOKEN MULAI DAN TOKEN SUBMIT
+
+Implementasikan dua jenis token yang berbeda.
+
+### Token mulai ujian
+- Dibuat atau diterbitkan oleh proktor yang berwenang.
+- Terikat pada sesi ujian tertentu.
+- Berlaku hanya dalam rentang waktu yang ditetapkan.
+- Tidak boleh digunakan untuk sesi lain.
+- Memiliki batas percobaan.
+- Memiliki masa berlaku.
+- Disimpan dalam bentuk hash apabila memungkinkan.
+- Tidak ditampilkan kepada peserta yang tidak berhak.
+- Dapat dicabut dan diterbitkan ulang sesuai izin.
+
+### Token submit
+Sediakan opsi untuk mewajibkan token penyelesaian.
+
+Jika kebijakan sekolah mengaktifkannya:
+- Token submit baru dapat diterbitkan setelah 45 menit sejak waktu mulai resmi peserta atau waktu mulai sesi, sesuai konfigurasi administrator.
+- Waktu acuan harus berasal dari backend.
+- Peserta tidak boleh memanipulasi jam komputer untuk mempercepat penerbitan token.
+- Token hanya berlaku untuk attempt dan sesi terkait.
+- Token memiliki masa berlaku dan batas percobaan.
+- Penerbitan, penggunaan, dan kegagalan validasi dicatat dalam audit log.
+
+Sediakan pengaturan apakah submit boleh dilakukan tanpa token setelah durasi minimum tercapai, agar kebijakan dapat disesuaikan.
+
+Penting: token submit tidak boleh menghalangi pengiriman otomatis ketika deadline resmi telah berakhir. Sistem harus mempunyai mekanisme penyelesaian darurat yang aman jika proktor tidak tersedia atau terjadi gangguan teknis.
+
+Jangan menggunakan token sebagai satu-satunya mekanisme autentikasi. Setiap permintaan tetap harus memvalidasi identitas, hak akses, attempt, sesi, dan status ujian.
+
+## 12. PENYIMPANAN JAWABAN DAN PEMULIHAN KONEKSI
+
+Ini merupakan fitur kritis.
+
+Implementasikan:
+- Autosave ketika jawaban berubah.
+- Debounce untuk menghindari permintaan berlebihan.
+- Penyimpanan berkala sebagai perlindungan tambahan.
+- Indikator status penyimpanan.
+- Retry dengan exponential backoff dan jitter.
+- Idempotency key untuk operasi yang berisiko duplikasi.
+- Sinkronisasi ketika koneksi kembali.
+- Pemulihan attempt setelah browser dimuat ulang.
+- Penanganan konflik perubahan.
+- Validasi batas waktu pada server.
+- Pengiriman jawaban final secara idempoten.
+
+Gunakan IndexedDB untuk antrean lokal jawaban yang belum berhasil disinkronkan, jika sesuai. Simpan hanya data minimum yang dibutuhkan. Lindungi data lokal dari kebocoran pada perangkat bersama dan hapus cache sensitif setelah ujian berakhir sesuai kebijakan.
+
+Jangan pernah menandai jawaban sebagai tersimpan di server sebelum server mengonfirmasi keberhasilan penyimpanan.
+
+Jika koneksi putus:
+1. Tampilkan peringatan yang jelas.
+2. Pertahankan jawaban lokal sementara.
+3. Jangan membuat attempt baru.
+4. Lakukan sinkronisasi kembali ketika koneksi pulih.
+5. Jangan menerima jawaban setelah deadline hanya karena jawaban tersimpan secara lokal.
+6. Tampilkan status sinkronisasi yang sebenarnya.
+
+Sistem harus membedakan:
+- Jawaban tersimpan di server.
+- Jawaban tersimpan lokal tetapi belum tersinkronisasi.
+- Jawaban gagal disimpan.
+
+## 13. TIMER DAN FINALISASI
+
+Gunakan waktu server sebagai acuan.
+
+Timer di browser hanya untuk visualisasi. Backend wajib memeriksa deadline pada setiap operasi yang relevan.
+
+Saat waktu habis:
+- Attempt harus ditutup secara otomatis melalui mekanisme backend yang andal.
+- Jawaban terakhir yang sudah berhasil tersimpan harus dipertahankan.
+- Jawaban lokal yang belum tersinkronisasi tidak boleh dianggap tersimpan di server.
+- Status attempt berubah menjadi AUTO_SUBMITTED atau status final yang sesuai.
+- Nilai dihitung setelah validasi.
+- Peristiwa dicatat dalam audit log.
+
+Jangan hanya mengandalkan JavaScript setInterval pada browser untuk menutup ujian.
+
+Implementasikan mekanisme penutupan otomatis yang realistis untuk deployment serverless. Jika tidak menggunakan scheduler, setiap permintaan yang relevan harus memeriksa deadline, dan sistem harus menyediakan proses rekonsiliasi untuk menemukan attempt kedaluwarsa.
+
+Finalisasi harus idempoten. Klik submit berkali-kali tidak boleh membuat nilai ganda atau mengubah hasil final.
+
+## 14. PANEL PROKTOR
+
+Buat dashboard proktor yang menampilkan:
+- Daftar sesi yang ditugaskan.
+- Jadwal dan durasi.
+- Jumlah peserta.
+- Peserta belum mulai.
+- Peserta sedang mengerjakan.
+- Peserta terputus.
+- Peserta sudah submit.
+- Peserta mengalami masalah.
+- Token aktif.
+- Status sesi.
+
+Sediakan aksi:
+- Buka sesi.
+- Tutup sesi.
+- Terbitkan token.
+- Cabut token.
+- Lihat status peserta.
+- Lihat waktu mulai dan waktu submit.
+- Catat insiden.
+- Berikan izin pemulihan sesuai kewenangan.
+
+Setiap aksi sensitif wajib dicatat.
+
+Jangan menampilkan kunci jawaban atau jawaban benar pada dashboard proktor.
+
+Untuk pemantauan realtime, gunakan listener Firestore yang dibatasi pada sesi terkait, atau polling adaptif. Jangan menggunakan listener global untuk semua peserta tanpa kebutuhan.
+
+## 15. PANEL ADMINISTRATOR
+
+Buat dashboard administrator dengan sidebar yang konsisten:
+
+- Dashboard.
+- Data siswa.
+- Data guru.
+- Data proktor.
+- Kelas dan rombongan belajar.
+- Mata pelajaran.
+- Bank soal.
+- Paket ujian.
+- Jadwal ujian.
+- Pembagian sesi.
+- Token ujian.
+- Monitoring ujian.
+- Hasil ujian.
+- Analisis nilai.
+- Laporan.
+- Audit log.
+- Pengaturan.
+
+Dashboard menampilkan ringkasan:
+- Jumlah siswa.
+- Jumlah guru.
+- Jumlah mata pelajaran aktif.
+- Jumlah paket ujian.
+- Jumlah ujian terjadwal.
+- Peserta sedang ujian.
+- Peserta telah selesai.
+- Peserta belum mulai.
+- Peserta mengalami gangguan.
+
+Gunakan pagination, pencarian server-side, filter, dan pemrosesan data yang efisien.
+
+Jangan mengambil seluruh koleksi siswa atau jawaban ujian ke browser sekaligus.
+
+## 16. DATABASE FIRESTORE
+
+Rancang struktur koleksi yang efisien, misalnya:
+
+- users
+- students
+- teachers
+- proctors
+- classes
+- subjects
+- questionBanks
+- questionVersions
+- examPackages
+- examSessions
+- sessionAssignments
+- examAttempts
+- answerDocuments
+- examTokens
+- examResults
+- auditLogs
+- appSettings
+
+Struktur tersebut boleh disesuaikan selama relasi, keamanan, dan performanya lebih baik.
+
+Setiap dokumen harus mempunyai ID, timestamp yang sesuai, serta field status yang tervalidasi.
+
+Pisahkan data publik dari data privat.
+
+Pisahkan kunci jawaban dari konten soal yang dikirim ke browser.
+
+Simpan jawaban peserta dalam dokumen yang dibatasi per attempt atau kelompok soal agar ukuran dokumen tidak terus membesar. Perhatikan batas ukuran dokumen Firestore dan biaya baca/tulis.
+
+Gunakan transaksi atau operasi atomik yang sesuai untuk:
+- Klaim attempt aktif.
+- Validasi token.
+- Finalisasi ujian.
+- Penetapan status.
+- Pencegahan duplikasi submission.
+
+Rancang indeks Firestore untuk query yang benar-benar digunakan. Sertakan konfigurasi indeks yang diperlukan.
+
+Jangan menggunakan satu dokumen global yang terus diperbarui oleh seluruh peserta sebagai counter, karena berpotensi menjadi bottleneck.
+
+## 17. KEAMANAN FIREBASE DAN API
+
+Buat Firestore Security Rules dengan prinsip default deny.
+
+Jangan mempercayai data role dari localStorage, parameter URL, atau objek request yang dibuat pengguna.
+
+Backend harus memverifikasi Firebase ID token untuk setiap endpoint privat dan memeriksa otorisasi berdasarkan data yang terpercaya.
+
+Gunakan Firebase Admin SDK hanya di server.
+
+Jika server menggunakan Admin SDK, ingat bahwa akses tersebut tidak otomatis dibatasi oleh Firestore Security Rules. Karena itu, setiap endpoint backend harus menerapkan pemeriksaan otorisasi sendiri.
+
+Terapkan:
+- Validasi input di server.
+- Pembatasan ukuran request.
+- Rate limiting yang sesuai.
+- Pencegahan brute force token.
+- Sanitasi konten.
+- Pembatasan CORS.
+- Proteksi terhadap IDOR.
+- Validasi kepemilikan attempt.
+- Pencegahan pengiriman ulang yang tidak sah.
+- Audit log untuk operasi sensitif.
+- Pesan error yang tidak membocorkan informasi rahasia.
+
+Jangan mengeklaim aplikasi anti-cheat sempurna. Browser biasa tidak dapat menjamin bahwa siswa tidak membuka tab lain, menggunakan perangkat kedua, atau mengambil foto layar.
+
+Sediakan fitur pembatasan navigasi dan peringatan sesuai kemampuan browser, tanpa mengganggu aksesibilitas atau merusak browser siswa.
+
+## 18. HASIL DAN ANALISIS NILAI
+
+Dukung penilaian:
+- Pilihan ganda satu jawaban.
+- Pilihan ganda kompleks.
+- Benar/salah.
+- Menjodohkan.
+- Isian singkat dengan aturan penilaian yang dapat dikonfigurasi.
+- Uraian dengan rubrik penilaian manual.
+
+Untuk pilihan ganda satu jawaban, nilai berdasarkan kunci dan bobot yang tersimpan di server.
+
+Untuk pilihan ganda kompleks, sediakan beberapa metode penilaian yang dapat dipilih administrator, misalnya exact match atau partial credit. Jangan memberikan nilai parsial jika kebijakan tersebut tidak diaktifkan.
+
+Untuk jawaban uraian, sediakan:
+- Rubrik.
+- Skor minimum dan maksimum.
+- Catatan penilai.
+- Status belum dinilai, sedang dinilai, dan sudah dinilai.
+- Riwayat perubahan nilai.
+- Identitas penilai.
+
+Tampilkan:
+- Nilai per siswa.
+- Nilai per kelas.
+- Nilai per mata pelajaran.
+- Nilai per sesi.
+- Rata-rata.
+- Median.
+- Nilai tertinggi dan terendah.
+- Distribusi nilai.
+- Persentase ketuntasan berdasarkan batas yang ditentukan.
+- Jumlah benar dan salah jika sesuai jenis soal.
+- Analisis butir soal.
+- Tingkat kesulitan empiris berdasarkan hasil peserta.
+- Daya pembeda jika ukuran dan karakteristik data mendukung analisis tersebut.
+
+Bedakan nilai yang sudah final dari nilai yang masih menunggu penilaian uraian.
+
+Sediakan ekspor CSV dan laporan PDF. Jangan membocorkan hasil siswa kepada role yang tidak berhak.
+
+## 19. IMPORT DATA DAN PENGELOLAAN PESERTA
+
+Sediakan impor data peserta melalui CSV dengan kolom:
+- Nama lengkap.
+- NISN.
+- Nomor peserta.
+- Kelas.
+- Rombongan belajar.
+- Sekolah.
+- Status.
+
+Fitur impor harus:
+- Memvalidasi header.
+- Memvalidasi tipe data.
+- Memeriksa duplikasi.
+- Menampilkan pratinjau.
+- Menampilkan baris yang gagal.
+- Menyediakan laporan kesalahan.
+- Memproses data dalam batch.
+- Tidak menggandakan siswa saat file yang sama diimpor ulang.
+- Memungkinkan unduhan hasil validasi.
+
+Sediakan pengelolaan pembagian peserta ke sesi secara manual dan melalui impor file.
+
+Jangan menempatkan password atau token autentikasi siswa dalam file ekspor umum.
+
+## 20. KINERJA DAN SKALA
+
+Rancang sistem untuk target awal:
+- 1.000 peserta keseluruhan.
+- Hingga 120 peserta pada satu sesi.
+- 6 sesi per hari.
+- 13 hari pelaksanaan.
+
+Angka ini merupakan target desain, bukan jaminan performa sebelum pengujian.
+
+Optimalkan:
+- Bundle frontend.
+- Lazy loading.
+- Pagination.
+- Query Firestore.
+- Jumlah listener.
+- Frekuensi autosave.
+- Pengiriman jawaban.
+- Ukuran payload.
+- Penggunaan cache yang aman.
+- Penanganan error dan retry.
+
+Jangan mengambil data yang sama secara berulang tanpa kebutuhan.
+
+Buat strategi pengujian beban untuk:
+1. 120 peserta login dalam waktu berdekatan.
+2. 120 peserta memulai ujian.
+3. 120 peserta melakukan autosave.
+4. 120 peserta mengirim jawaban.
+5. Administrator memantau sesi saat ujian berjalan.
+6. Peserta terputus dan menyambung kembali.
+7. Banyak request token pada saat yang sama.
+
+Gunakan load testing di lingkungan pengujian dengan data sintetis, bukan dengan menyerang sistem produksi.
+
+Dokumentasikan keterbatasan paket gratis Vercel dan Firebase. Jangan mengasumsikan seluruh layanan memiliki kuota gratis tanpa batas.
+
+Buat perkiraan jumlah operasi baca/tulis berdasarkan asumsi jumlah soal, durasi ujian, frekuensi autosave, dan jumlah peserta. Jelaskan bagian yang perlu diukur sebelum hari pelaksanaan.
+
+## 21. DEPLOYMENT DAN PAKET GRATIS
+
+Target deployment:
+- Frontend: Vercel.
+- API: Vercel Serverless Functions.
+- Database: Firebase Cloud Firestore.
+- Authentication: Firebase Authentication.
+- Repository: GitHub.
+
+Prioritaskan layanan yang dapat berjalan pada paket gratis, tetapi jangan memaksakan fitur keamanan penting untuk menghindari biaya.
+
+Jangan menjadikan Firebase Cloud Functions sebagai ketergantungan wajib. Gunakan API backend Vercel untuk logika yang memerlukan kredensial Admin SDK, sepanjang sesuai batas paket dan runtime.
+
+Jika ada fitur yang tidak dapat berjalan pada paket gratis, jelaskan:
+1. Penyebabnya.
+2. Dampaknya.
+3. Alternatif arsitektur.
+4. Perkiraan kebutuhan kuota.
+5. Apakah perubahan paket berbayar benar-benar diperlukan.
+
+Sediakan:
+- File konfigurasi Vercel.
+- Instruksi deployment.
+- `.env.example`.
+- Dokumentasi konfigurasi Firebase.
+- Firestore Security Rules.
+- Firestore indexes.
+- Skrip atau prosedur bootstrap administrator pertama.
+- Skrip migrasi atau inisialisasi database jika diperlukan.
+- Dokumentasi backup dan pemulihan.
+- Panduan pemulihan insiden.
+
+Jangan menyimpan kredensial asli dalam repository.
+
+## 22. STRUKTUR KODE
+
+Pisahkan kode menjadi modul yang jelas, misalnya:
+
+src/
+- app/
+- components/
+- pages/
+- layouts/
+- features/
+  - auth/
+  - students/
+  - subjects/
+  - question-bank/
+  - exam-packages/
+  - exam-engine/
+  - proctor/
+  - results/
+  - reports/
+- services/
+- hooks/
+- types/
+- utils/
+
+api/
+- auth/
+- students/
+- exams/
+- attempts/
+- answers/
+- tokens/
+- proctor/
+- results/
+- reports/
+
+firebase/
+- firestore.rules
+- firestore.indexes.json
+
+Struktur boleh disesuaikan dengan konvensi Vercel yang dipilih.
+
+Pisahkan:
+- UI.
+- Domain logic.
+- Validasi.
+- Repository data.
+- API handler.
+- Kebijakan akses.
+- Mesin penilaian.
+- Audit logging.
+
+Jangan menulis seluruh aplikasi dalam satu file besar.
+
+Hindari duplikasi logika bisnis antara frontend dan backend. Backend merupakan sumber kebenaran untuk status ujian, deadline, token, otorisasi, dan nilai.
+
+## 23. PENGUJIAN WAJIB
+
+Buat unit test, integration test, dan pengujian alur utama.
+
+Skenario minimum:
+1. Login siswa valid.
+2. Login dengan kredensial salah.
+3. Siswa tidak dapat mengakses data siswa lain.
+4. Guru tidak dapat mengakses kewenangan guru lain.
+5. Proktor hanya dapat mengelola sesi yang ditugaskan.
+6. Token valid dapat digunakan sesuai aturan.
+7. Token kedaluwarsa ditolak.
+8. Token sesi lain ditolak.
+9. Token submit sebelum 45 menit ditolak ketika kebijakan minimum waktu aktif.
+10. Token submit setelah syarat terpenuhi diterima.
+11. Waktu habis menutup ujian secara benar.
+12. Jawaban tersimpan dan dipulihkan.
+13. Retry tidak membuat duplikasi jawaban.
+14. Submit berulang tidak membuat nilai ganda.
+15. Kunci jawaban tidak terlihat di browser.
+16. Role yang tidak berwenang tidak dapat mengubah nilai.
+17. Impor siswa mendeteksi duplikasi.
+18. Pengacakan soal tetap konsisten pada attempt yang sama.
+19. Peserta yang terputus dapat melanjutkan attempt sesuai kebijakan.
+20. Data hasil ujian sesuai dengan jawaban dan aturan penilaian.
+
+Jalankan pemeriksaan TypeScript, lint, unit test, dan build sebelum menyatakan implementasi selesai.
+
+Jangan menyatakan tes lulus jika belum benar-benar dijalankan.
+
+## 24. DESAIN DAN PENGALAMAN PENGGUNA
+
+Gunakan desain modern, bersih, profesional, dan cocok untuk lingkungan sekolah Indonesia.
+
+Gunakan:
+- Tipografi yang mudah dibaca.
+- Kontras warna yang memadai.
+- Tombol yang jelas.
+- Jarak antarelemen yang konsisten.
+- Loading state.
+- Empty state.
+- Error state.
+- Konfirmasi aksi penting.
+- Notifikasi yang tidak mengganggu.
+- Navigasi keyboard.
+- Label aksesibel.
+- Tampilan desktop dan Chromebook yang optimal.
+
+Jangan menampilkan terlalu banyak grafik pada halaman pengerjaan soal.
+
+Halaman ujian harus ringan dan fokus pada soal. Dashboard administrator boleh mempunyai tabel, kartu ringkasan, dan grafik analisis.
+
+Gunakan Bahasa Indonesia yang baik dan konsisten.
+
+## 25. URUTAN PENGERJAAN AGENT
+
+Kerjakan dalam fase berikut.
+
+### Fase 1 — Analisis dan fondasi
+- Periksa lingkungan project.
+- Buat arsitektur.
+- Tentukan struktur folder.
+- Tentukan model data.
+- Tentukan daftar endpoint.
+- Identifikasi keterbatasan platform.
+- Buat checklist implementasi.
+
+### Fase 2 — Fondasi aplikasi
+- Buat proyek React + TypeScript.
+- Buat routing.
+- Buat sistem desain.
+- Buat layout login, siswa, guru, administrator, dan proktor.
+- Hubungkan Firebase Authentication.
+- Konfigurasikan Firestore.
+
+### Fase 3 — Backend dan keamanan
+- Buat API serverless.
+- Integrasikan Firebase Admin SDK.
+- Implementasikan autentikasi dan RBAC.
+- Buat Firestore Security Rules.
+- Pisahkan data publik dan privat.
+- Buat audit log.
+- Buat pengujian keamanan dasar.
+
+### Fase 4 — Data master dan bank soal
+- Buat CRUD siswa.
+- Buat CRUD kelas.
+- Buat CRUD mata pelajaran.
+- Buat CRUD guru dan proktor.
+- Buat bank soal.
+- Buat paket ujian.
+- Buat impor dan ekspor.
+
+### Fase 5 — Mesin ujian
+- Buat penugasan sesi.
+- Buat token mulai.
+- Buat token submit.
+- Buat halaman konfirmasi.
+- Buat halaman pengerjaan.
+- Buat timer server-authoritative.
+- Buat autosave.
+- Buat pemulihan koneksi.
+- Buat finalisasi dan penilaian.
+
+### Fase 6 — Proktor dan hasil
+- Buat monitoring sesi.
+- Buat kontrol token.
+- Buat pengelolaan insiden.
+- Buat laporan nilai.
+- Buat analisis hasil.
+- Buat ekspor CSV dan PDF.
+
+### Fase 7 — Pengujian dan deployment
+- Jalankan semua test yang tersedia.
+- Perbaiki error build.
+- Periksa security rules.
+- Uji seluruh role.
+- Uji pemulihan koneksi.
+- Uji finalisasi.
+- Uji beban di lingkungan pengujian.
+- Siapkan konfigurasi Vercel dan Firebase.
+- Buat panduan deployment.
+
+Jangan hanya membuat file kosong atau tombol yang tidak berfungsi. Setiap fitur yang dinyatakan selesai harus mempunyai implementasi nyata, validasi, dan pengujian yang sesuai.
+
+Jika seluruh fase terlalu besar untuk satu iterasi, selesaikan secara bertahap tanpa merusak hasil fase sebelumnya. Pertahankan konsistensi tipe data, API, database, dan desain.
+
+## 26. KRITERIA SELESAI
+
+Aplikasi baru boleh dinyatakan siap untuk uji coba jika:
+
+- Login dan role bekerja.
+- Semua mata pelajaran tersedia sebagai data yang dapat dikelola.
+- Data siswa dapat diimpor.
+- Paket soal dapat dibuat.
+- Jadwal dan pembagian sesi berfungsi.
+- Token divalidasi oleh backend.
+- Ujian dapat dimulai sesuai jadwal.
+- Timer mengikuti waktu server.
+- Jawaban dapat disimpan dan dipulihkan.
+- Jawaban final tidak dapat diubah tanpa prosedur resmi.
+- Penilaian menggunakan kunci privat di backend.
+- Proktor dapat memantau peserta sesuai kewenangan.
+- Administrator dapat menganalisis hasil.
+- Data antar-peserta terisolasi.
+- Build dan pengujian utama berhasil.
+- Deployment dapat dilakukan dengan konfigurasi yang terdokumentasi.
+- Kuota dan risiko operasional paket gratis sudah dianalisis.
+
+## 27. INSTRUKSI AKHIR
+
+Mulai dengan memeriksa lingkungan project dan menyusun fondasi aplikasi yang benar.
+
+Jangan berhenti pada wireframe, halaman statis, atau data dummy.
+
+Jangan membuat asumsi yang membahayakan keamanan data ujian.
+
+Jika ada keputusan teknis yang tidak ditentukan, pilih pendekatan yang paling aman, sederhana, hemat operasi database, mudah dipelihara, dan kompatibel dengan Vercel serta Firebase.
+
+Sebelum mengimplementasikan fitur sensitif, jelaskan secara singkat keputusan arsitektur yang relevan. Setelah itu, langsung kerjakan kodenya.
+
+Pada akhir setiap fase, laporkan:
+1. Fitur yang benar-benar sudah selesai.
+2. File yang dibuat atau diubah.
+3. Pengujian yang benar-benar dijalankan dan hasilnya.
+4. Konfigurasi yang masih memerlukan tindakan manual.
+5. Risiko atau batasan yang masih ada.
+6. Langkah berikutnya.
+
+Prioritaskan integritas ujian, keamanan data siswa, keakuratan nilai, kestabilan penyimpanan jawaban, dan kompatibilitas deployment dibandingkan efek visual yang tidak penting.
